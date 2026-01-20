@@ -52,10 +52,10 @@ export default async function authWizard(appendToExisting: boolean = false): Pro
 			// Check if this is a user cancellation (Ctrl+C)
 			if (error instanceof Error && error.name === "ExitPromptError") {
 				console.log("\n\n⚠️  Configuration cancelled by user.\n")
-				process.exit(0)
+				return undefined
 			}
 			console.error(`\n❌ Authentication failed: ${error instanceof Error ? error.message : String(error)}`)
-			process.exit(1)
+			return undefined
 		}
 
 		// Model Selection
@@ -129,7 +129,7 @@ export default async function authWizard(appendToExisting: boolean = false): Pro
 		// Check if this is a user cancellation (Ctrl+C) at the provider selection stage
 		if (error instanceof Error && error.name === "ExitPromptError") {
 			console.log("\n\n⚠️  Configuration cancelled by user.\n")
-			process.exit(0)
+			return undefined
 		}
 		// Re-throw other errors
 		throw error

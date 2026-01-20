@@ -229,6 +229,14 @@ async function addProvider(context: CommandContext): Promise<void> {
 				content,
 				ts: Date.now(),
 			})
+		} else {
+			// User cancelled the configuration
+			addMessage({
+				id: Date.now().toString(),
+				type: "system",
+				content: "Provider configuration cancelled.",
+				ts: Date.now(),
+			})
 		}
 	} catch (error) {
 		addMessage({
