@@ -46,6 +46,7 @@ async function showCurrentProvider(context: CommandContext): Promise<void> {
 	content += `\n**Commands:**\n`
 	content += `  /provider list - List all configured providers\n`
 	content += `  /provider select <provider-id> - Switch to a different provider\n`
+	content += `  /provider add - Add a new provider\n`
 
 	addMessage({
 		id: Date.now().toString(),
@@ -177,22 +178,85 @@ async function providerAutocompleteProvider(context: ArgumentProviderContext) {
 	})
 }
 
+/**
+ * Add a new provider
+ */
+async function addProvider(context: CommandContext): Promise<void> {
+	const { addMessage, addProvider, runWithoutUI } = context
+
+	try {
+		// Import authWizard dynamically to avoid circular dependencies
+		const { default: authWizard } = await import("../auth/index.js")
+		
+		addMessage({
+			id: Date.now().toString(),
+			type: "system",
+			content: "Starting provider configuration...",
+			ts: Date.now(),
+		})
+
+		// Run the auth wizard to get a new provider config
+		let newProvider
+		if (runWithoutUI) {
+			// If runWithoutUI is available (running from within the CLI UI), use it to temporarily unmount the UI
+			newProvider = await runWithoutUI(async () => {
+				return authWizard(true)
+			})
+		} else {
+			// If runWithoutUI is not available (running in standalone mode), just run the auth wizard directly
+			newProvider = await authWizard(true)
+		}
+		
+		if (newProvider) {
+			// Add the new provider to the config
+			await addProvider(newProvider)
+
+			const providerLabel = getProviderLabel(newProvider.provider)
+			const modelInfo = getModelIdForProvider(newProvider)
+
+			let content = `✓ Added provider **${newProvider.id}**\n`
+			content += `Type: ${providerLabel}\n`
+
+			if (modelInfo) {
+				content += `Model: ${modelInfo}\n`
+			}
+
+			content += `\nUse \`/provider select ${newProvider.id}\` to switch to this provider\n`
+
+			addMessage({
+				id: Date.now().toString(),
+				type: "system",
+				content,
+				ts: Date.now(),
+			})
+		}
+	} catch (error) {
+		addMessage({
+			id: Date.now().toString(),
+			type: "error",
+			content: `Failed to add provider: ${error instanceof Error ? error.message : String(error)}`,
+			ts: Date.now(),
+		})
+	}
+}
+
 export const providerCommand: Command = {
 	name: "provider",
 	aliases: ["prov"],
 	description: "View and manage providers",
 	usage: "/provider [subcommand] [args]",
-	examples: ["/provider", "/provider list", "/provider select my-anthropic"],
+	examples: ["/provider", "/provider list", "/provider select my-anthropic", "/provider add"],
 	category: "settings",
 	priority: 8,
 	arguments: [
 		{
 			name: "subcommand",
-			description: "Subcommand: list, select",
+			description: "Subcommand: list, select, add",
 			required: false,
 			values: [
 				{ value: "list", description: "List all configured providers" },
 				{ value: "select", description: "Switch to a different provider" },
+				{ value: "add", description: "Add a new provider" },
 			],
 		},
 		{
@@ -245,11 +309,15 @@ export const providerCommand: Command = {
 				await selectProvider(context, args[1])
 				break
 
+			case "add":
+				await addProvider(context)
+				break
+
 			default:
 				context.addMessage({
 					id: Date.now().toString(),
 					type: "error",
-					content: `Unknown subcommand "${subcommand}". Available: list, select`,
+					content: `Unknown subcommand "${subcommand}". Available: list, select, add`,
 					ts: Date.now(),
 				})
 		}

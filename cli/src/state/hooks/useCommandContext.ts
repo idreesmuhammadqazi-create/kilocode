@@ -24,6 +24,7 @@ import {
 	updateProviderAtom,
 	selectProviderAtom,
 	configAtom,
+	addProviderAtom,
 } from "../atoms/config.js"
 import {
 	routerModelsAtom,
@@ -69,6 +70,8 @@ export type CommandContextFactory = (
 export interface UseCommandContextReturn {
 	/** Factory function to create CommandContext objects */
 	createContext: CommandContextFactory
+	/** Function to run a command without the UI */
+	runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T>
 }
 
 /**
@@ -89,7 +92,7 @@ export interface UseCommandContextReturn {
  * }
  * ```
  */
-export function useCommandContext(): UseCommandContextReturn {
+export function useCommandContext(runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T>): UseCommandContextReturn {
 	// Get atoms and hooks
 	const addMessage = useSetAtom(addMessageAtom)
 	const clearMessages = useSetAtom(clearMessagesAtom)
@@ -98,6 +101,7 @@ export function useCommandContext(): UseCommandContextReturn {
 	const setTheme = useSetAtom(setThemeAtom)
 	const updateProvider = useSetAtom(updateProviderAtom)
 	const selectProvider = useSetAtom(selectProviderAtom)
+	const addProvider = useSetAtom(addProviderAtom)
 	const refreshRouterModels = useSetAtom(requestRouterModelsAtom)
 	const setMessageCutoffTimestamp = useSetAtom(setMessageCutoffTimestampAtom)
 	const setCommittingParallelMode = useSetAtom(isCommittingParallelModeAtom)
@@ -154,6 +158,7 @@ export function useCommandContext(): UseCommandContextReturn {
 				args,
 				options,
 				config,
+				runWithoutUI,
 				sendMessage: async (message: unknown) => {
 					await sendMessage(message as Parameters<typeof sendMessage>[0])
 				},
@@ -218,6 +223,10 @@ export function useCommandContext(): UseCommandContextReturn {
 				selectProvider: async (providerId: string) => {
 					await selectProvider(providerId)
 				},
+				// Provider addition function
+				addProvider: async (provider: ProviderConfig) => {
+					await addProvider(provider)
+				},
 				// Profile data context
 				profileData,
 				balanceData,
@@ -261,6 +270,7 @@ export function useCommandContext(): UseCommandContextReturn {
 			kilocodeDefaultModel,
 			updateProvider,
 			selectProvider,
+			addProvider,
 			refreshRouterModels,
 			replaceMessages,
 			setMessageCutoffTimestamp,
@@ -290,5 +300,5 @@ export function useCommandContext(): UseCommandContextReturn {
 		],
 	)
 
-	return { createContext }
+	return { createContext, runWithoutUI }
 }

@@ -340,6 +340,68 @@ export class CLI {
 	 * - Renders the UI
 	 * - Waits for exit
 	 */
+	/**
+	 * Unmount the UI temporarily (for running CLI commands that need direct stdout access)
+	 */
+	private unmountUI(): void {
+		if (this.ui) {
+			this.ui.unmount()
+			this.ui = null
+		}
+	}
+
+	/**
+	 * Remount the UI after a temporary unmount
+	 */
+	private async remountUI(): Promise<void> {
+		if (!this.store) {
+			throw new Error("Store not initialized")
+		}
+
+		// Render UI with store
+		const shouldDisableStdin = this.options.jsonInteractive || this.options.ci || !process.stdin.isTTY
+		const renderOptions: RenderOptions = {
+			incrementalRendering: true,
+			exitOnCtrlC: false,
+			...(shouldDisableStdin ? { stdout: process.stdout, stderr: process.stderr } : {}),
+		}
+
+		this.ui = render(
+			React.createElement(App, {
+				store: this.store,
+				options: {
+					mode: this.options.mode || "code",
+					workspace: this.options.workspace || process.cwd(),
+					ci: this.options.ci || false,
+					yolo: this.options.yolo || false,
+					json: this.options.json || false,
+					jsonInteractive: this.options.jsonInteractive || false,
+					prompt: this.options.prompt || "",
+					...(this.options.timeout !== undefined && { timeout: this.options.timeout }),
+					parallel: this.options.parallel || false,
+					worktreeBranch: this.options.worktreeBranch || undefined,
+					noSplash: this.options.noSplash || false,
+					attachments: this.options.attachments,
+				},
+				onExit: () => this.dispose(),
+				runWithoutUI: this.runWithoutUI.bind(this),
+			}),
+			renderOptions,
+		)
+	}
+
+	/**
+	 * Run a function with the UI temporarily unmounted
+	 */
+	async runWithoutUI<T>(fn: () => Promise<T>): Promise<T> {
+		this.unmountUI()
+		try {
+			return await fn()
+		} finally {
+			await this.remountUI()
+		}
+	}
+
 	async start(): Promise<void> {
 		// Initialize if not already done
 		if (!this.isInitialized) {
@@ -380,6 +442,7 @@ export class CLI {
 					attachments: this.options.attachments,
 				},
 				onExit: () => this.dispose(),
+				runWithoutUI: this.runWithoutUI.bind(this),
 			}),
 			renderOptions,
 		)

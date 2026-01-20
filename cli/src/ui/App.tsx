@@ -26,13 +26,14 @@ export interface AppProps {
 	store: JotaiStore
 	options: AppOptions
 	onExit: () => void
+	runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T>
 }
 
-export const App: React.FC<AppProps> = ({ store, options, onExit }) => {
+export const App: React.FC<AppProps> = ({ store, options, onExit, runWithoutUI }) => {
 	return (
 		<JotaiProvider store={store}>
 			<KeyboardProvider>
-				<UI options={options} onExit={onExit} />
+				<UI options={options} onExit={onExit} runWithoutUI={runWithoutUI} />
 			</KeyboardProvider>
 		</JotaiProvider>
 	)

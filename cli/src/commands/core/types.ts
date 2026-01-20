@@ -33,6 +33,10 @@ export interface CommandOption {
 }
 
 export interface CommandContext {
+	/**
+	 * Runs a function with the UI temporarily unmounted (for commands that need direct stdout access)
+	 */
+	runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T>
 	input: string
 	args: string[]
 	options: Record<string, string | number | boolean>
@@ -58,6 +62,8 @@ export interface CommandContext {
 	updateProvider: (providerId: string, updates: Partial<ProviderConfig>) => Promise<void>
 	// Provider selection function
 	selectProvider: (providerId: string) => Promise<void>
+	// Provider addition function
+	addProvider: (provider: ProviderConfig) => Promise<void>
 	// Profile data context
 	profileData: ProfileData | null
 	balanceData: BalanceData | null

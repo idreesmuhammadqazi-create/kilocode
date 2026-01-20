@@ -45,11 +45,15 @@ export interface UseCommandHandlerReturn {
  * }
  * ```
  */
-export function useCommandHandler(): UseCommandHandlerReturn {
+export interface UseCommandHandlerProps {
+	runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T> | undefined
+}
+
+export function useCommandHandler({ runWithoutUI }: UseCommandHandlerProps = {}): UseCommandHandlerReturn {
 	const [isExecuting, setIsExecuting] = useState(false)
 	const addMessage = useSetAtom(addMessageAtom)
 	const setCommandFinished = useSetAtom(ciCommandFinishedAtom)
-	const { createContext } = useCommandContext()
+	const { createContext } = useCommandContext(runWithoutUI!)
 
 	const executeCommand = useCallback(
 		async (input: string, onExit: () => void): Promise<void> => {

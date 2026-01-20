@@ -48,9 +48,10 @@ initializeCommands()
 interface UIAppProps {
 	options: AppOptions
 	onExit: () => void
+	runWithoutUI?: <T>(fn: () => Promise<T>) => Promise<T>
 }
 
-export const UI: React.FC<UIAppProps> = ({ options, onExit }) => {
+export const UI: React.FC<UIAppProps> = ({ options, onExit, runWithoutUI }) => {
 	const isStreaming = useAtomValue(isStreamingAtom)
 	const error = useAtomValue(errorAtom)
 	const theme = useTheme()
@@ -77,7 +78,7 @@ export const UI: React.FC<UIAppProps> = ({ options, onExit }) => {
 	const exitRequestCounter = useAtomValue(exitRequestCounterAtom)
 
 	// Use specialized hooks for command and message handling
-	const { executeCommand, isExecuting: isExecutingCommand } = useCommandHandler()
+	const { executeCommand, isExecuting: isExecutingCommand } = useCommandHandler({ runWithoutUI })
 	const { sendUserMessage, isSending: isSendingMessage } = useMessageHandler({
 		...(options.ci !== undefined && { ciMode: options.ci }),
 	})
