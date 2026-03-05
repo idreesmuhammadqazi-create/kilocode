@@ -63,15 +63,15 @@ export const PrCommand = cmd({
               await $`git branch --set-upstream-to=${remoteName}/${headRefName} ${localBranchName}`.nothrow()
             }
 
-            // Check for opencode session link in PR body
+            // Check for session link in PR body
             if (prInfo && prInfo.body) {
-              const sessionMatch = prInfo.body.match(/https:\/\/opncd\.ai\/s\/([a-zA-Z0-9_-]+)/)
+              const sessionMatch = prInfo.body.match(/(https:\/\/(?:opncd\.ai|share\.kilo\.ai)\/s\/[a-zA-Z0-9_-]+)/) // kilocode_change
               if (sessionMatch) {
                 const sessionUrl = sessionMatch[0]
-                UI.println(`Found opencode session: ${sessionUrl}`)
+                UI.println(`Found session: ${sessionUrl}`) // kilocode_change
                 UI.println(`Importing session...`)
 
-                const importResult = await $`opencode import ${sessionUrl}`.nothrow()
+                const importResult = await $`kilo import ${sessionUrl}`.nothrow() // kilocode_change
                 if (importResult.exitCode === 0) {
                   const importOutput = importResult.text().trim()
                   // Extract session ID from the output (format: "Imported session: <session-id>")
@@ -88,24 +88,26 @@ export const PrCommand = cmd({
 
         UI.println(`Successfully checked out PR #${prNumber} as branch '${localBranchName}'`)
         UI.println()
-        UI.println("Starting opencode...")
+        UI.println("Starting kilo...") // kilocode_change
         UI.println()
 
-        // Launch opencode TUI with session ID if available
+        // kilocode_change start
+        // Launch kilo TUI with session ID if available
         const { spawn } = await import("child_process")
-        const opencodeArgs = sessionId ? ["-s", sessionId] : []
-        const opencodeProcess = spawn("opencode", opencodeArgs, {
+        const tui_args = sessionId ? ["-s", sessionId] : []
+        const child = spawn("kilo", tui_args, {
           stdio: "inherit",
           cwd: process.cwd(),
         })
 
         await new Promise<void>((resolve, reject) => {
-          opencodeProcess.on("exit", (code) => {
+          child.on("exit", (code) => {
             if (code === 0) resolve()
-            else reject(new Error(`opencode exited with code ${code}`))
+            else reject(new Error(`kilo exited with code ${code}`))
           })
-          opencodeProcess.on("error", reject)
+          child.on("error", reject)
         })
+        // kilocode_change end
       },
     })
   },

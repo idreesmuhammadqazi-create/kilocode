@@ -2,6 +2,7 @@ import { PlanExitTool } from "./plan"
 import { QuestionTool } from "./question"
 import { BashTool } from "./bash"
 import { EditTool } from "./edit"
+import { MultiEditTool } from "./multiedit" // kilocode_change
 import { GlobTool } from "./glob"
 import { GrepTool } from "./grep"
 import { BatchTool } from "./batch"
@@ -108,6 +109,7 @@ export namespace ToolRegistry {
       GlobTool,
       GrepTool,
       EditTool,
+      MultiEditTool, // kilocode_change
       WriteTool,
       TaskTool,
       WebFetchTool,
@@ -150,7 +152,7 @@ export namespace ToolRegistry {
           const usePatch =
             model.modelID.includes("gpt-") && !model.modelID.includes("oss") && !model.modelID.includes("gpt-4")
           if (t.id === "apply_patch") return usePatch
-          if (t.id === "edit" || t.id === "write") return !usePatch
+          if (t.id === "edit" || t.id === "write" || t.id === "multiedit") return !usePatch // kilocode_change
 
           return true
         })
