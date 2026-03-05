@@ -1,4 +1,4 @@
-This is a tool for making multiple edits to a single file in one operation. It is built on top of the Edit tool and allows you to perform multiple find-and-replace operations efficiently. Prefer this tool over the Edit tool when you need to make multiple edits to the same file.
+This is a tool for making multiple edits across one or more files in a single operation. It is built on top of the Edit tool and allows you to perform multiple find-and-replace operations efficiently. Prefer this tool over the Edit tool when you need to make 2 or more edits, whether to the same file or across different files.
 
 Before using this tool:
 
@@ -6,22 +6,20 @@ Before using this tool:
 2. Verify the directory path is correct
 
 To make multiple file edits, provide the following:
-1. file_path: The absolute path to the file to modify (must be absolute, not relative)
-2. edits: An array of edit operations to perform, where each edit contains:
+1. edits: An array of edit operations to perform, where each edit contains:
+   - filePath: The absolute path to the file to modify (must be absolute, not relative)
    - oldString: The text to replace (must match the file contents exactly, including all whitespace and indentation)
    - newString: The edited text to replace the oldString
    - replaceAll: Replace all occurrences of oldString. This parameter is optional and defaults to false.
 
 IMPORTANT:
 - All edits are applied in sequence, in the order they are provided
-- Each edit operates on the result of the previous edit
-- All edits must be valid for the operation to succeed - if any edit fails, none will be applied
-- This tool is ideal when you need to make several changes to different parts of the same file
+- Each edit operates on the result of the previous edit (for edits targeting the same file)
+- This tool is ideal when you need to make several changes across one or more files in a single tool call
 
 CRITICAL REQUIREMENTS:
 1. All edits follow the same requirements as the single Edit tool
-2. The edits are atomic - either all succeed or none are applied
-3. Plan your edits carefully to avoid conflicts between sequential operations
+2. Plan your edits carefully to avoid conflicts between sequential operations on the same file
 
 WARNING:
 - The tool will fail if edits.oldString doesn't match the file contents exactly (including whitespace)
@@ -33,9 +31,9 @@ When making edits:
 - Do not leave the code in a broken state
 - Always use absolute file paths (starting with /)
 - Only use emojis if the user explicitly requests it. Avoid adding emojis to files unless asked.
-- Use replaceAll for replacing and renaming strings across the file. This parameter is useful if you want to rename a variable for instance.
+- Use replaceAll for replacing and renaming strings across a file. This parameter is useful if you want to rename a variable for instance.
 
 If you want to create a new file, use:
-- A new file path, including dir name if needed
+- The new file path
 - First edit: empty oldString and the new file's contents as newString
 - Subsequent edits: normal edit operations on the created content
