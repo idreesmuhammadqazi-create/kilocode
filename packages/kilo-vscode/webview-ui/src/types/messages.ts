@@ -240,6 +240,7 @@ export interface ProviderModel {
 export interface Provider {
   id: string
   name: string
+  source?: "env" | "config" | "custom" | "api"
   models: Record<string, ProviderModel>
 }
 
