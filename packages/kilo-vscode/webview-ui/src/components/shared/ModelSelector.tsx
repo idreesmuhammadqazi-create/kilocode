@@ -14,7 +14,7 @@ import { useProvider, EnrichedModel } from "../../context/provider"
 import { useSession } from "../../context/session"
 import { useLanguage } from "../../context/language"
 import type { ModelSelection } from "../../types/messages"
-import { KILO_GATEWAY_ID, providerSortKey, isFree, buildTriggerLabel } from "./model-selector-utils"
+import { providerSortKey, isFree, buildTriggerLabel } from "./model-selector-utils"
 
 interface ModelGroup {
   providerName: string
@@ -39,7 +39,7 @@ export interface ModelSelectorBaseProps {
 }
 
 export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
-  const { connected, models, findModel } = useProvider()
+  const { models, findModel } = useProvider()
   const language = useLanguage()
   const selectedModel = () => findModel(props.value)
 
@@ -50,21 +50,15 @@ export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
   let searchRef: HTMLInputElement | undefined
   let listRef: HTMLDivElement | undefined
 
-  // Only show models from Kilo Gateway or connected providers
-  const visibleModels = createMemo(() => {
-    const c = connected()
-    return models().filter((m) => m.providerID === KILO_GATEWAY_ID || c.includes(m.providerID))
-  })
-
-  const hasProviders = () => visibleModels().length > 0
+  const hasProviders = () => models().length > 0
 
   // Flat filtered list for keyboard navigation
   const filtered = createMemo(() => {
     const q = search().toLowerCase()
     if (!q) {
-      return visibleModels()
+      return models()
     }
-    return visibleModels().filter(
+    return models().filter(
       (m) =>
         m.name.toLowerCase().includes(q) || m.providerName.toLowerCase().includes(q) || m.id.toLowerCase().includes(q),
     )
