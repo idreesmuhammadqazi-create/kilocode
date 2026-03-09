@@ -10,6 +10,8 @@ import { useSession } from "../../context/session"
 import { ModelSelectorBase } from "../shared/ModelSelector"
 import type { ModelSelection } from "../../types/messages"
 import SettingsRow from "./SettingsRow"
+import { useDialog } from "@kilocode/kilo-ui/context/dialog"
+import { DialogCustomProvider } from "./DialogCustomProvider"
 
 interface ProviderOption {
   value: string
@@ -33,6 +35,7 @@ const ProvidersTab: Component = () => {
   const provider = useProvider()
   const language = useLanguage()
   const session = useSession()
+  const dialog = useDialog()
 
   const providerOptions = createMemo<ProviderOption[]>(() =>
     Object.keys(provider.providers())
@@ -130,6 +133,20 @@ const ProvidersTab: Component = () => {
             </SettingsRow>
           )}
         </For>
+      </Card>
+
+      {/* Custom providers */}
+      <h4 style={{ "margin-top": "16px", "margin-bottom": "8px" }}>{language.t("provider.custom.title")}</h4>
+      <Card>
+        <SettingsRow
+          title={language.t("provider.custom.title")}
+          description={`${language.t("provider.custom.description.prefix")}${language.t("provider.custom.description.link")}${language.t("provider.custom.description.suffix")}`}
+          last
+        >
+          <Button variant="secondary" onClick={() => dialog.show(() => <DialogCustomProvider />)}>
+            {language.t("common.add")}
+          </Button>
+        </SettingsRow>
       </Card>
 
       {/* Disabled providers */}

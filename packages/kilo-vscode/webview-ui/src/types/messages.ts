@@ -1459,6 +1459,13 @@ export interface SetDefaultBaseBranchRequest {
   branch?: string
 }
 
+// Set provider API key auth (webview → extension)
+export interface SetProviderAuthRequest {
+  type: "setProviderAuth"
+  providerID: string
+  key: string
+}
+
 export type WebviewMessage =
   | SendMessageRequest
   | AbortRequest
@@ -1542,6 +1549,7 @@ export type WebviewMessage =
   | ApplyWorktreeDiffMessage
   | EnhancePromptRequest
   | SetDefaultBaseBranchRequest
+  | SetProviderAuthRequest
 
 // ============================================
 // VS Code API type

@@ -588,6 +588,18 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             })
           break
         }
+        case "setProviderAuth": {
+          const { providerID, key } = message
+          if (this.client) {
+            this.client.auth
+              .set({ providerID, auth: { type: "api", key } }, { throwOnError: true })
+              .then(() => this.fetchAndSendProviders())
+              .catch((error: unknown) => {
+                console.error("[Kilo New] KiloProvider: Failed to set provider auth:", error)
+              })
+          }
+          break
+        }
       }
     })
   }
