@@ -57,7 +57,7 @@ import { Auth } from "./auth"
 import { DbCommand } from "./cli/cmd/db"
 import path from "path"
 import { Global } from "./global"
-import { createHelpCommand } from "./kilocode/help-command" // kilocode_change
+import { HelpCommand } from "./cli/cmd/help" // kilocode_change - enhanced help with examples
 import { JsonMigration } from "./storage/json-migration"
 import { Database } from "./storage/db"
 import { errorMessage } from "./util/error"
@@ -232,7 +232,7 @@ let cli = yargs(args) // kilocode_change
   .command(DbCommand)
 
 // kilocode_change start - registered after initial chain to avoid self-referential type error
-cli = cli.command(createHelpCommand(() => cli))
+cli = cli.command(HelpCommand)
 
 cli = cli
   // kilocode_change end

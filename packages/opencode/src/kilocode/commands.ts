@@ -23,7 +23,7 @@ import { RemoteCommand } from "../cli/cmd/remote"
 import { DbCommand } from "../cli/cmd/db"
 import { ConfigCommand as ConfigCLICommand } from "../cli/cmd/config"
 import { PluginCommand } from "../cli/cmd/plug"
-import { HelpCommand } from "./help-command"
+import { HelpCommand } from "../cli/cmd/help" // kilocode_change - enhanced help with examples
 
 // Synthetic entry for the yargs built-in .completion() command so that
 // generateHelp --all and cli-reference.md include it automatically.
