@@ -1143,7 +1143,13 @@ export function Prompt(props: PromptProps) {
                     })
                     return
                   }
-                  // If no image, let the default paste behavior continue
+                  // Handle text clipboard content
+                  if (content?.mime === "text/plain") {
+                    e.preventDefault()
+                    pasteText(content.data, content.data)
+                    return
+                  }
+                  // If no image or text, let the default paste behavior continue
                 }
                 if (keybind.match("input_clear", e) && store.prompt.input !== "") {
                   input.clear()
