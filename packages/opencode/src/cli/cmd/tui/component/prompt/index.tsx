@@ -1143,7 +1143,22 @@ export function Prompt(props: PromptProps) {
                     })
                     return
                   }
-                  // If no image, let the default paste behavior continue
+                  // If text in clipboard, paste it
+                  if (content?.mime === "text/plain") {
+                    e.preventDefault()
+                    const text = content.data as string
+                    // Normalize line endings
+                    const normalizedText = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+                    const summary = shouldPasteSummary(normalizedText)
+                    if (summary.summarize && !sync.data.config.experimental?.disable_paste_summary) {
+                      pasteText(normalizedText, `[Pasted ~${summary.lines} lines]`)
+                    } else {
+                      // Direct insertion allows user edits to be preserved
+                      input.insertText(normalizedText)
+                    }
+                    return
+                  }
+                  // If no content, let the default paste behavior continue
                 }
                 if (keybind.match("input_clear", e) && store.prompt.input !== "") {
                   input.clear()
