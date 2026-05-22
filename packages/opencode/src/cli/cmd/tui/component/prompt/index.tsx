@@ -1133,8 +1133,13 @@ export function Prompt(props: PromptProps) {
                 // This helps terminals that forward Ctrl+V to the app; Windows
                 // Terminal 1.25+ usually handles Ctrl+V before this path.
                 if (keybind.match("input_paste", e)) {
+                  console.log("DEBUG: Paste keybind matched (Ctrl+V detected)")
                   const content = await Clipboard.read()
+                  console.log("DEBUG: Clipboard content:", JSON.stringify(content, null, 2))
+                  console.log("DEBUG: Content mime type:", content?.mime)
+                  console.log("DEBUG: Content data length:", content?.data?.length)
                   if (content?.mime.startsWith("image/")) {
+                    console.log("DEBUG: Image detected, pasting as attachment")
                     e.preventDefault()
                     await pasteAttachment({
                       filename: "clipboard",
@@ -1145,10 +1150,12 @@ export function Prompt(props: PromptProps) {
                   }
                   // Handle text clipboard content
                   if (content?.mime === "text/plain") {
+                    console.log("DEBUG: Text detected, calling pasteText()")
                     e.preventDefault()
                     pasteText(content.data, content.data)
                     return
                   }
+                  console.log("DEBUG: No image or text detected, allowing default behavior")
                   // If no image or text, let the default paste behavior continue
                 }
                 if (keybind.match("input_clear", e) && store.prompt.input !== "") {
