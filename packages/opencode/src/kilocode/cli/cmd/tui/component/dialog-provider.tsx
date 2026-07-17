@@ -9,6 +9,7 @@ import type { JSX } from "solid-js"
 import type { RGBA } from "@opentui/core"
 import type { ProviderAuthAuthorization } from "@kilocode/sdk/v2"
 import { KiloAutoMethod } from "@/kilocode/components/dialog-kilo-auto-method"
+import { DialogCustomCompatible } from "@/kilocode/cli/cmd/tui/component/dialog-custom-compatible"
 export { selectProvider } from "@/kilocode/anaconda-desktop/tui/setup"
 
 // ---------------------------------------------------------------------------
@@ -115,6 +116,31 @@ export function renderAutoMethod(opts: {
 // ---------------------------------------------------------------------------
 // API-key dialog description
 // ---------------------------------------------------------------------------
+
+/**
+ * Renders the "Custom Provider (OpenAI / Anthropic compatible)" entry used by
+ * the upstream provider dialog. Returns `undefined` so the upstream renderer
+ * falls through to its default option rendering.
+ */
+export function renderCustomCompatibleOption(): {
+  title: string
+  description: string
+  category: string
+} {
+  return {
+    title: "Custom Provider",
+    description: "OpenAI / Anthropic compatible",
+    category: "Popular",
+  }
+}
+
+/** Sentinel value for the custom provider option in the upstream picker. */
+export const CUSTOM_COMPATIBLE_OPTION_VALUE = "__kilo_custom_compatible__"
+
+/** Hook the upstream picker calls when the custom provider entry is selected. */
+export function selectCustomCompatible(replace: (node: () => any) => void) {
+  replace(() => <DialogCustomCompatible />)
+}
 
 /**
  * Returns a custom description element for the API-key dialog when the

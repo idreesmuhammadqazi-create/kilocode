@@ -38,6 +38,11 @@ type ProviderOption =
   | (ProviderOptionBase & {
       type: "custom"
     })
+  // kilocode_change start - custom OpenAI-/Anthropic-compatible entry rendered by KiloProvider
+  | (ProviderOptionBase & {
+      type: "custom-compatible"
+    })
+  // kilocode_change end
 
 export function providerOptions(list: { id: string; name: string }[]): ProviderOption[] {
   return [
@@ -60,6 +65,15 @@ export function providerOptions(list: { id: string; name: string }[]): ProviderO
       description: "Custom provider",
       category: "Providers",
     },
+    // kilocode_change start - Kilo "Custom Provider" entry for OpenAI-/Anthropic-compatible endpoints
+    {
+      type: "custom-compatible",
+      title: KiloProvider.renderCustomCompatibleOption().title,
+      value: KiloProvider.CUSTOM_COMPATIBLE_OPTION_VALUE,
+      description: KiloProvider.renderCustomCompatibleOption().description,
+      category: KiloProvider.renderCustomCompatibleOption().category,
+    },
+    // kilocode_change end
   ]
 }
 
@@ -116,6 +130,20 @@ export function createDialogProviderOptions() {
             },
           }
         }
+
+        // kilocode_change start - Kilo "Custom Provider" entry: opens the OpenAI-/Anthropic-compatible flow
+        if (provider.type === "custom-compatible") {
+          return {
+            title: provider.title,
+            value: provider.value,
+            description: provider.description,
+            category: provider.category,
+            async onSelect() {
+              KiloProvider.selectCustomCompatible(dialog.replace)
+            },
+          }
+        }
+        // kilocode_change end
 
         const providerID = provider.providerID
         const consoleManaged = isConsoleManagedProvider(sync.data.console_state.consoleManagedProviders, providerID)

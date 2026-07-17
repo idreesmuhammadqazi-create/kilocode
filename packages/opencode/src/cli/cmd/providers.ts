@@ -16,6 +16,7 @@ import { Process } from "@/util/process"
 import { errorMessage } from "@/util/error"
 import { text } from "node:stream/consumers"
 import { Effect, Option } from "effect"
+import { runCustomProviderFlow, CUSTOM_PROVIDER_VALUE } from "@/kilocode/cli/cmd/custom-provider" // kilocode_change
 
 type PluginAuth = NonNullable<Hooks["auth"]>
 
@@ -409,6 +410,9 @@ export const ProvidersLoginCommand = effectCmd({
         value: x.id,
         hint: "plugin",
       })),
+      // kilocode_change start - surface a "Custom Provider" entry that walks the user through OpenAI-/Anthropic-compatible setup
+      { label: "Custom Provider (OpenAI / Anthropic compatible)", value: CUSTOM_PROVIDER_VALUE, hint: "custom" },
+      // kilocode_change end
     ]
 
     let provider: string
@@ -439,6 +443,15 @@ export const ProvidersLoginCommand = effectCmd({
       const handled = yield* handlePluginAuth({ auth: plugin.auth! }, provider, args.method)
       if (handled) return
     }
+
+    // kilocode_change start - launch the custom OpenAI-/Anthropic-compatible provider flow
+    if (provider === CUSTOM_PROVIDER_VALUE) {
+      const globalConfig = yield* cfgSvc.getGlobal()
+      const existing = new Set(Object.keys(globalConfig.provider ?? {}))
+      yield* runCustomProviderFlow(existing)
+      return
+    }
+    // kilocode_change end
 
     if (provider === "other") {
       provider = (yield* promptValue(
